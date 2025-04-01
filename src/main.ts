@@ -9,7 +9,7 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-async function bootstrap() {
+export async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'log', 'debug'],
   });
@@ -34,7 +34,6 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: ['1'],
-    // prefix: 'api/v', // URLs will be: /api/v1/xxx, /api/v2/xxx
   });
 
   app.useGlobalPipes(
@@ -110,5 +109,11 @@ async function bootstrap() {
   });
 
   await app.listen(process.env.PORT || 4000);
+  
+  return app;
 }
-bootstrap();
+
+// Khởi động ứng dụng khi file được gọi trực tiếp
+if (require.main === module) {
+  bootstrap();
+}

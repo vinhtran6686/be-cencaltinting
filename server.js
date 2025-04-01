@@ -3,6 +3,7 @@
 
 const path = require('path');
 const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 // Tạo express app
 const app = express();
@@ -31,36 +32,63 @@ app.get('/vercel-test', (req, res) => {
   });
 });
 
-// Nếu đã build NestJS app, forward tất cả request khác đến NestJS
-if (process.env.NODE_ENV === 'production') {
+// Khai báo middleware để xử lý tất cả các request API
+app.all('/api/*', async (req, res) => {
   try {
-    console.log('Attempting to load NestJS app...');
-    // Chuyển hướng tất cả các request khác đến NestJS app
-    const nestApp = require('./dist/src/main');
-    console.log('NestJS app loaded successfully');
+    // Import NestJS bootstrap function
+    const { bootstrap } = require('./dist/src/main');
+    
+    // Khởi động NestJS app
+    const nestApp = await bootstrap();
+    
+    // Xử lý request
+    nestApp.getHttpAdapter().getInstance()(req, res);
   } catch (error) {
-    console.error('Error loading NestJS app:', error);
-    // Fallback nếu không load được NestJS app
-    app.all('*', (req, res) => {
-      res.status(500).json({
-        status: 'error',
-        message: 'Failed to load NestJS application',
-        error: error.message
-      });
+    console.error('Error handling API request:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to process API request',
+      error: error.message
     });
   }
-} else {
-  // Trong môi trường development
-  app.all('*', (req, res) => {
-    res.status(404).json({
-      status: 'error',
-      message: 'Route not found',
-      path: req.path
-    });
-  });
-}
+});
 
-// Bắt đầu server
+// Xử lý route api-docs (Swagger)
+app.all('/api-docs*', async (req, res) => {
+  try {
+    // Import NestJS bootstrap function
+    const { bootstrap } = require('./dist/src/main');
+    
+    // Khởi động NestJS app
+    const nestApp = await bootstrap();
+    
+    // Xử lý request
+    nestApp.getHttpAdapter().getInstance()(req, res);
+  } catch (error) {
+    console.error('Error handling Swagger request:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to load Swagger documentation',
+      error: error.message
+    });
+  }
+});
+
+// Xử lý các request khác
+app.all('*', (req, res) => {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/api-docs')) {
+    // Đã được xử lý bởi middleware trên
+    return;
+  }
+  
+  res.status(404).json({
+    status: 'error',
+    message: 'Route not found',
+    path: req.path
+  });
+});
+
+// Export app cho Vercel
 module.exports = app;
 
 // Chạy server khi không ở trên Vercel

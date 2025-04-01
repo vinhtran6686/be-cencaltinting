@@ -17,4 +17,15 @@ export class AppController {
   test() {
     return this.appService.getHello();
   }
+
+  // Vercel deployment test
+  @Get('vercel-test')
+  @Public()
+  vercelTest() {
+    return {
+      message: 'Vercel deployment is working!',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    };
+  }
 }

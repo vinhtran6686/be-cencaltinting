@@ -18,6 +18,17 @@ async function bootstrap() {
   const port = configService.get('PORT') || 3000;
 
   logger.log(`MongoDB URL: ${configService.get('MONGO_URL')}`);
+  logger.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Add a root handler for Vercel testing
+  app.getHttpAdapter().get('/', (req, res) => {
+    return res.json({
+      status: 'ok',
+      message: 'CenCal Tinting API is running',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
 
   app.setGlobalPrefix('api');
   app.enableVersioning({

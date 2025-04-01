@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { IdValueItem } from './types/vehicle.types';
 
 @Injectable()
 export class VehiclesService {
@@ -36,13 +37,19 @@ export class VehiclesService {
     { _id: '6', name: 'Convertible' },
   ];
 
-  async getYears() {
-    return this.years.map(year => year.year);
+  async getYears(): Promise<IdValueItem[]> {
+    return this.years.map(year => ({
+      id: year.year,
+      value: year.year
+    }));
   }
 
-  async getMakes(year?: string) {
+  async getMakes(year?: string): Promise<IdValueItem[]> {
     if (!year) {
-      return this.makes.map(make => make.name);
+      return this.makes.map(make => ({
+        id: make.name,
+        value: make.name
+      }));
     }
     
     const yearDoc = this.years.find(y => y.year === year);
@@ -53,10 +60,13 @@ export class VehiclesService {
     const yearId = yearDoc._id;
     return this.makes
       .filter(make => make.yearIds.includes(yearId))
-      .map(make => make.name);
+      .map(make => ({
+        id: make.name,
+        value: make.name
+      }));
   }
 
-  async getModels(year?: string, make?: string) {
+  async getModels(year?: string, make?: string): Promise<IdValueItem[]> {
     let filteredModels = [...this.models];
     
     if (year) {
@@ -79,10 +89,16 @@ export class VehiclesService {
       }
     }
     
-    return filteredModels.map(model => model.name);
+    return filteredModels.map(model => ({
+      id: model.name,
+      value: model.name
+    }));
   }
 
-  async getTypes() {
-    return this.types.map(type => type.name);
+  async getTypes(): Promise<IdValueItem[]> {
+    return this.types.map(type => ({
+      id: type.name,
+      value: type.name
+    }));
   }
 } 

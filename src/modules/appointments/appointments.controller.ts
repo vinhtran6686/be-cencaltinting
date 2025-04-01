@@ -4,6 +4,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { Public } from '../../shared/decorators/auth.decorator';
+import { IdLabelItem } from './types/vehicle.types';
 
 @ApiTags('appointments')
 @Controller('/appointments')
@@ -12,6 +13,85 @@ export class AppointmentsController {
   private readonly logger = new Logger(AppointmentsController.name);
 
   constructor(private readonly appointmentsService: AppointmentsService) {}
+
+  @Get('vehicle/test')
+  @ApiOperation({ summary: 'Test endpoint for vehicle data format' })
+  testVehicleDataFormat() {
+    // Hardcoded test data in the expected format
+    const testData: IdLabelItem[] = [
+      { id: '2024', value: '2024' },
+      { id: '2023', value: '2023' },
+      { id: '2022', value: '2022' }
+    ];
+    
+    this.logger.debug(`Test data: ${JSON.stringify(testData)}`);
+    
+    return {
+      data: testData,
+      message: 'Test data retrieved successfully'
+    };
+  }
+
+  @Get('vehicle/years')
+  @ApiOperation({ summary: 'Get list of available vehicle years' })
+  @ApiResponse({ status: 200, description: 'List of vehicle years in ID+value format' })
+  async getVehicleYears() {
+    this.logger.debug('GET /appointments/vehicle/years called');
+    const years = await this.appointmentsService.getVehicleYears();
+    return {
+      data: years,
+      message: 'Vehicle years fetched successfully'
+    };
+  }
+
+  @Get('vehicle/makes')
+  @ApiOperation({ summary: 'Get list of available vehicle makes/manufacturers' })
+  @ApiQuery({ name: 'year', required: false, type: String, description: 'Filter makes by year' })
+  @ApiResponse({ status: 200, description: 'List of vehicle makes in ID+value format' })
+  async getVehicleMakes(@Query('year') year?: string) {
+    this.logger.debug(`GET /appointments/vehicle/makes called with year=${year || 'undefined'}`);
+    const makes = await this.appointmentsService.getVehicleMakes(year);
+    return {
+      data: makes,
+      message: 'Vehicle makes fetched successfully'
+    };
+  }
+
+  @Get('vehicle/models')
+  @ApiOperation({ summary: 'Get list of available vehicle models' })
+  @ApiQuery({ name: 'year', required: false, type: String, description: 'Filter models by year' })
+  @ApiQuery({ name: 'make', required: false, type: String, description: 'Filter models by make' })
+  @ApiResponse({ status: 200, description: 'List of vehicle models in ID+value format' })
+  async getVehicleModels(
+    @Query('year') year?: string,
+    @Query('make') make?: string,
+  ) {
+    this.logger.debug(`GET /appointments/vehicle/models called with year=${year || 'undefined'}, make=${make || 'undefined'}`);
+    const models = await this.appointmentsService.getVehicleModels(year, make);
+    return {
+      data: models,
+      message: 'Vehicle models fetched successfully'
+    };
+  }
+
+  @Get('vehicle/types')
+  @ApiOperation({ summary: 'Get list of available vehicle types' })
+  @ApiQuery({ name: 'year', required: false, type: String, description: 'Filter types by year' })
+  @ApiQuery({ name: 'make', required: false, type: String, description: 'Filter types by make' })
+  @ApiQuery({ name: 'model', required: false, type: String, description: 'Filter types by model' })
+  @ApiResponse({ status: 200, description: 'List of vehicle types in ID+value format' })
+  async getVehicleTypes(
+    @Query('year') year?: string,
+    @Query('make') make?: string,
+    @Query('model') model?: string,
+  ) {
+    this.logger.debug(`GET /appointments/vehicle/types called with year=${year || 'undefined'}, make=${make || 'undefined'}, model=${model || 'undefined'}`);
+    const types = await this.appointmentsService.getVehicleTypes(year, make, model);
+    return {
+      data: types,
+      message: 'Vehicle types fetched successfully'
+    };
+  }
 
   @Get()
   @ApiOperation({ summary: 'Get list of appointments with pagination and filtering' })

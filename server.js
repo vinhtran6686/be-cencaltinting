@@ -1,36 +1,57 @@
-// Simple Express server setup to serve the built NestJS application
-const express = require('express');
-const path = require('path');
+// Server for Vercel deployment
+// This file serves as the entry point for Vercel
 
-const app = express();
-const PORT = process.env.PORT || 4000;
-
-// Log each request to help with debugging
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-
-// Serve the static NestJS app
-app.use(express.static(path.join(__dirname, 'dist')));
-
-// All routes should point to the built NestJS app
-app.all('*', (req, res) => {
-  try {
-    // Import and run the built app
-    const server = require('./dist/src/main');
-    return server; // This is just a placeholder, the actual app is handled by NestJS
-  } catch (error) {
-    console.error('Error serving NestJS app:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Server error while loading NestJS application',
-      timestamp: new Date().toISOString()
+// Check if we're in production (Vercel) or development
+if (process.env.NODE_ENV === 'production') {
+  // In production, require the built app directly
+  require('./dist/src/main');
+} else {
+  // For local development
+  const express = require('express');
+  const path = require('path');
+  
+  const app = express();
+  const PORT = process.env.PORT || 4000;
+  
+  // Log requests for debugging
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+  });
+  
+  // Create a simple status endpoint
+  app.get('/', (req, res) => {
+    res.json({
+      status: 'ok',
+      message: 'CenCal Tinting API is running (server.js)',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
     });
-  }
-});
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-}); 
+  });
+  
+  // Serve static files
+  app.use(express.static(path.join(__dirname, 'dist')));
+  
+  // For all other routes, try to use the built NestJS app
+  app.all('*', (req, res) => {
+    try {
+      res.status(404).json({
+        status: 'error',
+        message: 'Route not found in server.js',
+        path: req.path
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Server error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+  
+  // Start server
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+} 

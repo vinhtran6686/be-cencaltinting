@@ -1,20 +1,17 @@
 {
   "version": 2,
-  "buildCommand": "yarn build",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "nestjs",
-  "devCommand": "yarn dev",
-  "installCommand": "yarn install",
   "builds": [
     {
-      "src": "server.js",
+      "src": "index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/server.js",
+      "dest": "index.js",
       "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
     }
   ],

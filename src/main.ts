@@ -108,9 +108,9 @@ export async function bootstrap() {
     },
   });
 
-  await app.listen(process.env.PORT || 4000);
+  await app.listen(port, '0.0.0.0');
   
-  return app;
+  console.log(`Application running at: ${await app.getUrl()}`);
 }
 
 // Khởi động ứng dụng khi file được gọi trực tiếp

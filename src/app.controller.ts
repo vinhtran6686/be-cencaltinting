@@ -28,4 +28,19 @@ export class AppController {
       environment: process.env.NODE_ENV || 'development'
     };
   }
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
+
+  @Get('/health')
+  health() {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      service: 'cencaltinting-api'
+    };
+  }
 }

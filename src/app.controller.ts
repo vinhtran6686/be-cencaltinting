@@ -11,6 +11,12 @@ export class AppController {
     private readonly authService: AuthService,
   ) {}
 
+  @Get()
+  @Public()
+  root() {
+    return { status: 'ok' };
+  }
+
   // test api 
   @Get('test')
   @Public()

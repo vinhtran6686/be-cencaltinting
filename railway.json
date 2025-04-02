@@ -4,8 +4,6 @@
         "buildCommand": "npm run build"
     },
     "deploy": {
-        "startCommand": "npm run start:prod",
-        "healthcheckPath": "/api/health",
-        "healthcheckTimeout": 300
+        "startCommand": "npm run start:prod"
     }
 }

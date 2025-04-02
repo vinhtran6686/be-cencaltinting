@@ -4,8 +4,6 @@
         "buildCommand": "npm run build"
     },
     "deploy": {
-        "startCommand": "npm run start:prod",
-        "healthcheckPath": "/",
-        "healthcheckTimeout": 180
+        "startCommand": "npm run start:prod"
     }
 }
